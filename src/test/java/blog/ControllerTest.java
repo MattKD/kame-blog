@@ -391,51 +391,55 @@ public class ControllerTest {
 
     // create post for tmp user
 
-    var title = "Hello World!";
-    var text = "Hello there!";
-    var tag = "hello";
-    var req = MockMvcRequestBuilders.post("/add_post")
-              .accept(MediaType.APPLICATION_JSON)
-              .param("session", token.token)
-              .param("title", title)
-              .param("text", text)
-              .param("tags", tag);
+    List<List<String>> tags = List.of(List.of(), List.of("hello"), 
+                                      List.of("foo", "bar"));
+    for (int i = 0; i < tags.size(); i++) {
+      var title = "Hello World!" + i;
+      var text = "Hello there!" + i;
+      var req = MockMvcRequestBuilders.post("/add_post")
+                .accept(MediaType.APPLICATION_JSON)
+                .param("session", token.token)
+                .param("title", title)
+                .param("text", text);
+      for (var tag : tags.get(i)) {
+        req.param("tags", tag);
+      }
 
-    var res = mvc.perform(req).andReturn().getResponse();
+      var res = mvc.perform(req).andReturn().getResponse();
 
-    assertThat(res.getStatus()).isEqualTo(200);
-    assertThat(res.getContentType()).startsWith("application/json");
+      assertThat(res.getStatus()).isEqualTo(200);
+      assertThat(res.getContentType()).startsWith("application/json");
 
-    PostJson post = new ObjectMapper()
-        .readValue(res.getContentAsString(), PostJson.class);
-     
-    assertThat(post.id).isNotNull();
-    var expected = post_repo.findById(post.id).get();
+      PostJson post = new ObjectMapper()
+          .readValue(res.getContentAsString(), PostJson.class);
+       
+      assertThat(post.id).isNotNull();
+      var expected = post_repo.findById(post.id).get();
 
-    assertThat(post.id).isEqualTo(expected.getId());
-    assertThat(post.title).isEqualTo(title);
-    assertThat(post.title).isEqualTo(expected.getTitle());
-    assertThat(post.text).isEqualTo(text);
-    assertThat(post.text).isEqualTo(expected.getPostText());
-    assertDatesEqualNoMS(post.date, expected.getPostDate());
+      assertThat(post.id).isEqualTo(expected.getId());
+      assertThat(post.title).isEqualTo(title);
+      assertThat(post.title).isEqualTo(expected.getTitle());
+      assertThat(post.text).isEqualTo(text);
+      assertThat(post.text).isEqualTo(expected.getPostText());
+      assertDatesEqualNoMS(post.date, expected.getPostDate());
 
-    post_repo.delete(expected);
+      post_repo.delete(expected);
+    }
 
     // test creating post with bad session token
 
-    req = MockMvcRequestBuilders.post("/add_post")
+    var req = MockMvcRequestBuilders.post("/add_post")
             .accept(MediaType.APPLICATION_JSON)
             .param("session", "bad_token")
-            .param("title", title)
-            .param("text", text)
-            .param("tags", tag);
+            .param("title", "foo title")
+            .param("text", "bar text");
 
-    res = mvc.perform(req).andReturn().getResponse();
+    var res = mvc.perform(req).andReturn().getResponse();
 
     assertThat(res.getStatus()).isEqualTo(403);
     assertThat(res.getContentType()).startsWith("application/json");
 
-    post = new ObjectMapper()
+    var post = new ObjectMapper()
         .readValue(res.getContentAsString(), PostJson.class);
      
     assertThat(post.id).isNull();

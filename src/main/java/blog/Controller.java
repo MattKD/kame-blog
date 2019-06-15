@@ -2,6 +2,7 @@ package blog;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Calendar;
@@ -63,8 +64,8 @@ public class Controller {
   }
 
   @GetMapping("/get_posts")
-  public List<PostJson> getPosts(@RequestParam int page,
-                                 @RequestParam int size) {
+  public List<PostJson> getPosts(@RequestParam(defaultValue="0") int page,
+                                 @RequestParam(defaultValue="100") int size) {
     if (page < 0) {
       page = 0;
     }
@@ -79,9 +80,11 @@ public class Controller {
   }
 
   @GetMapping("/get_posts_by_tags")
-  public List<PostJson> getPostsByTags(@RequestParam List<String> tags,
-                                       @RequestParam int page,
-                                       @RequestParam int size) {
+  public List<PostJson> getPostsByTags(
+      @RequestParam List<String> tags,
+      @RequestParam(defaultValue="0") int page,
+      @RequestParam(defaultValue="100") int size) {
+
     if (page < 0) {
       page = 0;
     }
@@ -96,9 +99,11 @@ public class Controller {
   }
 
   @GetMapping("/get_user_posts")
-  public List<PostJson> getUserPosts(@RequestParam String username,
-                                     @RequestParam int page,
-                                     @RequestParam int size) {
+  public List<PostJson> getUserPosts(
+      @RequestParam String username,
+      @RequestParam(defaultValue="0") int page,
+      @RequestParam(defaultValue="100") int size) {
+
     if (page < 0) {
       page = 0;
     }
@@ -178,14 +183,14 @@ public class Controller {
     return msg;
   }
 
-
-
   @PostMapping("/add_post")
-  public PostJson addPost(@RequestParam String session, 
-                          @RequestParam String title,
-                          @RequestParam String text,
-                          @RequestParam(name="tags") List<String> tag_names,
-                          HttpServletResponse res) {
+  public PostJson addPost(
+      @RequestParam String session, 
+      @RequestParam String title,
+      @RequestParam String text,
+      @RequestParam(name="tags", required=false) List<String> tag_names,
+      HttpServletResponse res) {
+
     UserTokenJson token = Security.checkSession(secret_key, session);
     UserModel user = null;
     if (token != null) {
@@ -202,16 +207,19 @@ public class Controller {
       return result;
     }
 
-    var tags = tag_repo.findByNames(tag_names);
-    var tagset = tags.stream().map(t -> t.getName())
-                 .collect(Collectors.toSet());
+    List<TagModel> tags = new ArrayList<>();
+    if (tag_names != null) {
+      tags = tag_repo.findByNames(tag_names);
+      var tagset = tags.stream().map(t -> t.getName())
+                   .collect(Collectors.toSet());
 
-    for (var tagname : tag_names) {
-      if (!tagset.contains(tagname)) {
-        var tag = new TagModel();
-        tag.setName(tagname);
-        tag_repo.save(tag);
-        tags.add(tag);
+      for (var tagname : tag_names) {
+        if (!tagset.contains(tagname)) {
+          var tag = new TagModel();
+          tag.setName(tagname);
+          tag_repo.save(tag);
+          tags.add(tag);
+        }
       }
     }
 
@@ -221,10 +229,7 @@ public class Controller {
     var cal = Calendar.getInstance();
     post.setPostDate(cal.getTime());
     post.setUser(user);
-     
-    for (var tag : tags) {
-      post.addTag(tag);
-    }
+    post.addTags(tags);
          
     post_repo.save(post);
     boolean include_user = false;
