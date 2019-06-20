@@ -74,13 +74,12 @@ public class ControllerTest {
       assertThat(res.getStatus()).isEqualTo(200);
       assertThat(res.getContentType()).startsWith("application/json");
 
-      List<PostJson> posts = new ObjectMapper()
-        .readValue(res.getContentAsString(), 
-            new TypeReference<List<PostJson>>(){});
-     
+      PostListJson posts = new ObjectMapper()
+        .readValue(res.getContentAsString(), PostListJson.class);
+
       var expected = data.getPosts(page, page_size);
       boolean include_user = true;
-      assertPostJsonsEqualPostModels(posts, expected, include_user);
+      assertPostJsonsEqualPostModels(posts.posts, expected, include_user);
     }
 
     // test getting posts out of range
@@ -95,11 +94,10 @@ public class ControllerTest {
     assertThat(res.getStatus()).isEqualTo(200);
     assertThat(res.getContentType()).startsWith("application/json");
 
-    List<PostJson> posts = new ObjectMapper()
-      .readValue(res.getContentAsString(), 
-          new TypeReference<List<PostJson>>(){});
+    PostListJson posts = new ObjectMapper()
+      .readValue(res.getContentAsString(), PostListJson.class);
    
-    assertThat(posts).hasSize(0);
+    assertThat(posts.posts).hasSize(0);
   }
 
   @Test
@@ -130,13 +128,12 @@ public class ControllerTest {
         assertThat(res.getStatus()).isEqualTo(200);
         assertThat(res.getContentType()).startsWith("application/json");
 
-        List<PostJson> posts = new ObjectMapper()
-          .readValue(res.getContentAsString(), 
-              new TypeReference<List<PostJson>>(){});
+        PostListJson posts = new ObjectMapper()
+          .readValue(res.getContentAsString(), PostListJson.class);
        
         var expected = data.getPostsWithTags(tag_group, page, page_size);
         boolean include_user = true;
-        assertPostJsonsEqualPostModels(posts, expected, include_user);
+        assertPostJsonsEqualPostModels(posts.posts, expected, include_user);
       }
     }
 
@@ -152,11 +149,10 @@ public class ControllerTest {
     assertThat(res.getStatus()).isEqualTo(200);
     assertThat(res.getContentType()).startsWith("application/json");
 
-    List<PostJson> posts = new ObjectMapper()
-      .readValue(res.getContentAsString(), 
-          new TypeReference<List<PostJson>>(){});
+    PostListJson posts = new ObjectMapper()
+      .readValue(res.getContentAsString(), PostListJson.class);
    
-    assertThat(posts).hasSize(0);
+    assertThat(posts.posts).hasSize(0);
   }
 
   @Test
@@ -181,13 +177,12 @@ public class ControllerTest {
         assertThat(res.getStatus()).isEqualTo(200);
         assertThat(res.getContentType()).startsWith("application/json");
 
-        List<PostJson> posts = new ObjectMapper()
-          .readValue(res.getContentAsString(), 
-              new TypeReference<List<PostJson>>(){});
+        PostListJson posts = new ObjectMapper()
+          .readValue(res.getContentAsString(), PostListJson.class);
 
         var expected = data.getUserPosts(user.getId(), page, page_size);
         boolean include_user = false;
-        assertPostJsonsEqualPostModels(posts, expected, include_user);
+        assertPostJsonsEqualPostModels(posts.posts, expected, include_user);
       }
     }
 
@@ -201,14 +196,14 @@ public class ControllerTest {
 
     var res = mvc.perform(req).andReturn().getResponse();
 
-    assertThat(res.getStatus()).isEqualTo(200);
+    assertThat(res.getStatus()).isEqualTo(403);
     assertThat(res.getContentType()).startsWith("application/json");
 
-    List<PostJson> posts = new ObjectMapper()
-      .readValue(res.getContentAsString(), 
-          new TypeReference<List<PostJson>>(){});
+    PostListJson posts = new ObjectMapper()
+      .readValue(res.getContentAsString(), PostListJson.class);
 
-    assertThat(posts).hasSize(0);
+    assertThat(posts.msg).isNotNull();
+    assertThat(posts.msg).hasSizeGreaterThan(0);
   }
 
   @Test

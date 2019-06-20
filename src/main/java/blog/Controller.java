@@ -57,15 +57,18 @@ public class Controller {
   }
 
   private static 
-  List<PostJson> PostModelToJson(Collection<PostModel> posts, 
-                                 boolean include_user) {
-    return posts.stream().map(p -> PostModelToJson(p, include_user))
-           .collect(Collectors.toList());
+  PostListJson PostModelToJson(Collection<PostModel> posts, 
+                               boolean include_user) {
+    var posts_json = posts.stream().map(p -> PostModelToJson(p, include_user))
+                     .collect(Collectors.toList());
+    var post_list = new PostListJson();
+    post_list.posts = posts_json;
+    return post_list;
   }
 
   @GetMapping("/get_posts")
-  public List<PostJson> getPosts(@RequestParam(defaultValue="0") int page,
-                                 @RequestParam(defaultValue="100") int size) {
+  public PostListJson getPosts(@RequestParam(defaultValue="0") int page,
+                               @RequestParam(defaultValue="100") int size) {
     if (page < 0) {
       page = 0;
     }
@@ -80,7 +83,7 @@ public class Controller {
   }
 
   @GetMapping("/get_posts_by_tags")
-  public List<PostJson> getPostsByTags(
+  public PostListJson getPostsByTags(
       @RequestParam List<String> tags,
       @RequestParam(defaultValue="0") int page,
       @RequestParam(defaultValue="100") int size) {
@@ -99,10 +102,19 @@ public class Controller {
   }
 
   @GetMapping("/get_user_posts")
-  public List<PostJson> getUserPosts(
+  public PostListJson getUserPosts(
       @RequestParam String username,
       @RequestParam(defaultValue="0") int page,
-      @RequestParam(defaultValue="100") int size) {
+      @RequestParam(defaultValue="100") int size,
+      HttpServletResponse res) {
+
+    var user_opt = user_repo.findByName(username);
+    if (!user_opt.isPresent()) {
+      res.setStatus(403);
+      var result = new PostListJson();
+      result.msg = "Error: User not found";
+      return result;
+    }
 
     if (page < 0) {
       page = 0;
