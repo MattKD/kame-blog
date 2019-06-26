@@ -214,7 +214,7 @@ public class ControllerTest {
     // create tmp user
 
     var username = "tmp_user";
-    var password = "123456";
+    var password = "12345678";
     var req = MockMvcRequestBuilders.post("/create_user")
               .accept(MediaType.APPLICATION_JSON)
               .param("name", username)
@@ -251,6 +251,24 @@ public class ControllerTest {
     assertThat(token.expires).isNull();
     assertThat(token.token).isNull();
     assertThat(token.msg).isNotNull();
+
+    // try creating user with short password
+    req = MockMvcRequestBuilders.post("/create_user")
+              .accept(MediaType.APPLICATION_JSON)
+              .param("name", username)
+              .param("password", "1234567");
+
+    res = mvc.perform(req).andReturn().getResponse();
+
+    assertThat(res.getStatus()).isEqualTo(400);
+    assertThat(res.getContentType()).startsWith("application/json");
+
+    token = new ObjectMapper()
+        .readValue(res.getContentAsString(), UserTokenJson.class);
+    assertThat(token.id).isNull();
+    assertThat(token.expires).isNull();
+    assertThat(token.token).isNull();
+    assertThat(token.msg).isNotNull();
   }
 
   @Test
@@ -266,7 +284,7 @@ public class ControllerTest {
     // create tmp user and posts
 
     var username = "tmp_user_aj34";
-    var password = "pass12";
+    var password = "pass1234";
     var user = new UserModel(username, password);
     user_repo.save(user);
     assertThat(user_repo.count()).isEqualTo(num_users + 1);
@@ -325,7 +343,7 @@ public class ControllerTest {
     // create tmp user
 
     var username = "tmp_user";
-    var password = "pass12";
+    var password = "pass1234";
     var user = new UserModel(username, password);
     user_repo.save(user);
 
@@ -377,7 +395,7 @@ public class ControllerTest {
     // create tmp user
 
     var username = "tmp_user";
-    var password = "pass12";
+    var password = "pass1234";
     var user = new UserModel(username, password);
     user_repo.save(user);
 
@@ -423,25 +441,59 @@ public class ControllerTest {
 
     // test creating post with bad session token
 
-    var req = MockMvcRequestBuilders.post("/add_post")
-            .accept(MediaType.APPLICATION_JSON)
-            .param("session", "bad_token")
-            .param("title", "foo title")
-            .param("text", "bar text");
+    {
+      var req = MockMvcRequestBuilders.post("/add_post")
+              .accept(MediaType.APPLICATION_JSON)
+              .param("session", "bad_token")
+              .param("title", "foo title")
+              .param("text", "bar text");
 
-    var res = mvc.perform(req).andReturn().getResponse();
+      var res = mvc.perform(req).andReturn().getResponse();
 
-    assertThat(res.getStatus()).isEqualTo(403);
-    assertThat(res.getContentType()).startsWith("application/json");
+      assertThat(res.getStatus()).isEqualTo(403);
+      assertThat(res.getContentType()).startsWith("application/json");
 
-    var post = new ObjectMapper()
-        .readValue(res.getContentAsString(), PostJson.class);
-     
-    assertThat(post.id).isNull();
-    assertThat(post.title).isNull();
-    assertThat(post.text).isNull();
-    assertThat(post.date).isNull();
-    assertThat(post.msg).isNotNull();
+      var post = new ObjectMapper()
+          .readValue(res.getContentAsString(), PostJson.class);
+       
+      assertThat(post.id).isNull();
+      assertThat(post.title).isNull();
+      assertThat(post.text).isNull();
+      assertThat(post.date).isNull();
+      assertThat(post.msg).isNotNull();
+    }
+
+    // test creating post with bad token names
+    
+    tags = List.of(List.of(" "), List.of("_foo"),
+                   List.of("foo-bar"), List.of("a1234567891234567"),
+                   List.of("2foo"));
+    for (int i = 0; i < tags.size(); i++) {
+      var title = "Hello World!" + i;
+      var text = "Hello there!" + i;
+      var req = MockMvcRequestBuilders.post("/add_post")
+                .accept(MediaType.APPLICATION_JSON)
+                .param("session", token.token)
+                .param("title", title)
+                .param("text", text);
+      for (var tag : tags.get(i)) {
+        req.param("tags", tag);
+      }
+
+      var res = mvc.perform(req).andReturn().getResponse();
+
+      assertThat(res.getStatus()).isEqualTo(400);
+      assertThat(res.getContentType()).startsWith("application/json");
+
+      PostJson post = new ObjectMapper()
+          .readValue(res.getContentAsString(), PostJson.class);
+ 
+      assertThat(post.id).isNull();
+      assertThat(post.title).isNull();
+      assertThat(post.text).isNull();
+      assertThat(post.date).isNull();
+      assertThat(post.msg).isNotNull();
+    }
   }
 
   @Test
@@ -452,7 +504,7 @@ public class ControllerTest {
     // create tmp user
 
     var username = "tmp_user";
-    var password = "pass12";
+    var password = "pass1234";
     var user = new UserModel(username, password);
     user_repo.save(user);
 

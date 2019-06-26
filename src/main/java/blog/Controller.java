@@ -134,16 +134,30 @@ public class Controller {
                                   @RequestParam String password,
                                   HttpServletResponse res) {
     var user_token = new UserTokenJson();
+    name = name.trim();
+    password = password.trim();
+    if (name.length() < 2 || !name.matches("^[a-zA-Z]+[a-zA-Z_]*$")) {
+      res.setStatus(400);
+      user_token.msg = "Error: name is too short or in bad format";
+      return user_token;
+    }
+    if (password.length() < 8) {
+      res.setStatus(400);
+      user_token.msg = "Error: password must be at least 8 chars";
+      return user_token;
+    }
+
     if (disable_create_user) {
       res.setStatus(404);
       System.out.println("create_user disabled");
-      return null;
+      user_token.msg = "Error: Account creating is disabled";
+      return user_token;
     }
 
     var opt_user = user_repo.findByName(name);
     if (opt_user.isPresent()) {
       res.setStatus(403);
-      user_token.msg = "User " + name + " is already created";
+      user_token.msg = "Error: User " + name + " is in use";
       return user_token;
     }
 
@@ -161,6 +175,8 @@ public class Controller {
   public UserTokenJson login(@RequestParam String name, 
                              @RequestParam String password,
                              HttpServletResponse res) {
+    name = name.trim();
+    password = password.trim();
     var user_token = new UserTokenJson();
     var opt_user = user_repo.findByName(name);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
@@ -180,6 +196,8 @@ public class Controller {
   public MessageJson deleteUser(@RequestParam String name, 
                                 @RequestParam String password,
                                 HttpServletResponse res) {
+    name = name.trim();
+    password = password.trim();
     var msg = new MessageJson();
     var opt_user = user_repo.findByName(name);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
@@ -216,6 +234,32 @@ public class Controller {
       res.setStatus(403);
       var result = new PostJson();
       result.msg = "Error: invalid token";
+      return result;
+    }
+
+    boolean bad_input = false;
+    title = title.trim();
+    text = text.trim();
+
+    if (tag_names != null) {
+      tag_names = tag_names.stream().map(String::trim)
+                  .collect(Collectors.toList());
+
+      for (var tag : tag_names) {
+        if (!tag.matches("^[a-zA-Z]+[a-zA-Z0-9_]*$") || tag.length() > 16) {
+          bad_input = true;
+        }
+      }
+    }
+
+    if (title.equals("") || text.equals("")) {
+      bad_input = true;
+    }
+
+    if (bad_input) {
+      res.setStatus(400);
+      var result = new PostJson();
+      result.msg = "Error: bad input";
       return result;
     }
 

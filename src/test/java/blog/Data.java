@@ -28,9 +28,9 @@ public class Data {
     // create tags
 
     var tag_fun = new TagModel("fun");
-    var tag_highground = new TagModel("high-ground");
+    var tag_highground = new TagModel("high_ground");
     var tag_hello = new TagModel("hello");
-    var tag_badfeeling = new TagModel("bad-feeling");
+    var tag_badfeeling = new TagModel("bad_feeling");
     var tag_power = new TagModel("power");
 
     all_tags.add(tag_fun);
@@ -47,9 +47,9 @@ public class Data {
 
     // create users
 
-    var user_anakin = new UserModel("anakin", "1234");
-    var user_obi = new UserModel("obi", "1234");
-    var user_palpatine = new UserModel("palpatine", "1234");
+    var user_anakin = new UserModel("anakin", "12345678");
+    var user_obi = new UserModel("obi", "12345678");
+    var user_palpatine = new UserModel("palpatine", "12345678");
 
     all_users.add(user_anakin);
     all_users.add(user_obi);
