@@ -129,19 +129,24 @@ public class Controller {
     return PostModelToJson(posts, include_user);
   }
 
+  /*
+   * name must be at least 2 chars; start with a-z or A-Z; and contain only
+   * a-z, A-Z, or an underscore.
+   * password must be at least 8 chars, and contain non-whitespace ascii
+   */
   @PostMapping("/create_user")
   public UserTokenJson createUser(@RequestParam String name, 
                                   @RequestParam String password,
                                   HttpServletResponse res) {
+    var name_regex = "^[a-zA-Z]+[a-zA-Z_]*$";
+    var pw_regex = "^[-a-zA-Z0-9_!@#$%^&*+=)(]+$";
     var user_token = new UserTokenJson();
-    name = name.trim();
-    password = password.trim();
-    if (name.length() < 2 || !name.matches("^[a-zA-Z]+[a-zA-Z_]*$")) {
+    if (name.length() < 2 || !name.matches(name_regex)) {
       res.setStatus(400);
       user_token.msg = "Error: name is too short or in bad format";
       return user_token;
     }
-    if (password.length() < 8) {
+    if (password.length() < 8 || !name.matches(pw_regex)) {
       res.setStatus(400);
       user_token.msg = "Error: password must be at least 8 chars";
       return user_token;
@@ -213,6 +218,12 @@ public class Controller {
     return msg;
   }
 
+  /*
+   * title must be at least 1 char after whitespace trim.
+   * text must be at least 1 char after whitespace trim.
+   * tags must be between 1 to 16 chars after whitespace trim; start letter 
+   * a-z or A-Z; contain only a-z, A-Z, 0-9, or an underscore.
+   */
   @PostMapping("/add_post")
   public PostJson addPost(
       @RequestParam String session, 
