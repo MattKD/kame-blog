@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @RestController
@@ -180,8 +181,6 @@ public class Controller {
   public UserTokenJson login(@RequestParam String name, 
                              @RequestParam String password,
                              HttpServletResponse res) {
-    name = name.trim();
-    password = password.trim();
     var user_token = new UserTokenJson();
     var opt_user = user_repo.findByName(name);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
@@ -197,12 +196,11 @@ public class Controller {
     return user_token;
   }
 
+  @Transactional
   @PostMapping("/delete_user")
   public MessageJson deleteUser(@RequestParam String name, 
                                 @RequestParam String password,
                                 HttpServletResponse res) {
-    name = name.trim();
-    password = password.trim();
     var msg = new MessageJson();
     var opt_user = user_repo.findByName(name);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
