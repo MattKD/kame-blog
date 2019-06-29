@@ -38,6 +38,8 @@ public class Controller {
   private String secret_key;
   @Value("${kame.session_valid_days}") 
   private int session_valid_days;
+  @Value("${kame.debug_output}") 
+  private boolean debug_output;
 
   private static 
   PostJson PostModelToJson(PostModel post, boolean include_user) {
@@ -70,6 +72,10 @@ public class Controller {
   @GetMapping("/get_posts")
   public PostListJson getPosts(@RequestParam(defaultValue="0") int page,
                                @RequestParam(defaultValue="100") int size) {
+    if (debug_output) {
+      System.out.println("/get_posts: page=" + page + ", size=" + size);
+    }
+
     if (page < 0) {
       page = 0;
     }
@@ -88,6 +94,11 @@ public class Controller {
       @RequestParam List<String> tags,
       @RequestParam(defaultValue="0") int page,
       @RequestParam(defaultValue="100") int size) {
+
+    if (debug_output) {
+      System.out.println("/get_posts_by_tags: page=" + page + ", size=" + 
+                         size + ", tags=" + new ArrayList(tags));
+    }
 
     if (page < 0) {
       page = 0;
@@ -109,11 +120,19 @@ public class Controller {
       @RequestParam(defaultValue="100") int size,
       HttpServletResponse res) {
 
+    if (debug_output) {
+      System.out.println("/get_user_posts: username=" + username + ", page=" + 
+                         page + ", size=" + size);
+    }
+
     var user_opt = user_repo.findByName(username);
     if (!user_opt.isPresent()) {
       res.setStatus(403);
       var result = new PostListJson();
-      result.msg = "Error: User not found";
+      result.msg = "User not found";
+      if (debug_output) {
+        System.out.println("/get_user_posts error(403): " + result.msg);
+      }
       return result;
     }
 
@@ -136,61 +155,84 @@ public class Controller {
    * password must be at least 8 chars, and contain non-whitespace ascii
    */
   @PostMapping("/create_user")
-  public UserTokenJson createUser(@RequestParam String name, 
+  public UserTokenJson createUser(@RequestParam String username, 
                                   @RequestParam String password,
                                   HttpServletResponse res) {
+    if (debug_output) {
+      System.out.println("/create_user: username=" + username);
+    }
+
     var name_regex = "^[a-zA-Z]+[a-zA-Z_]*$";
     var pw_regex = "^[-a-zA-Z0-9_!@#$%^&*+=)(]+$";
     var user_token = new UserTokenJson();
-    if (name.length() < 2 || !name.matches(name_regex)) {
+
+    if (username.length() < 2 || !username.matches(name_regex)) {
       res.setStatus(400);
-      user_token.msg = "Error: name is too short or in bad format";
+      user_token.msg = "Name is too short or in a bad format";
+      if (debug_output) {
+        System.out.println("/create_user error(400): " + user_token.msg);
+      }
       return user_token;
     }
-    if (password.length() < 8 || !name.matches(pw_regex)) {
+
+    if (password.length() < 8 || !username.matches(pw_regex)) {
       res.setStatus(400);
-      user_token.msg = "Error: password must be at least 8 chars";
+      user_token.msg = "Password is too short or in a bad format";
+      if (debug_output) {
+        System.out.println("/create_user error(400): " + user_token.msg);
+      }
       return user_token;
     }
 
     if (disable_create_user) {
       res.setStatus(404);
-      System.out.println("create_user disabled");
-      user_token.msg = "Error: Account creating is disabled";
+      user_token.msg = "Account creation is disabled";
+      if (debug_output) {
+        System.out.println("/create_user error(404): " + user_token.msg);
+      }
       return user_token;
     }
 
-    var opt_user = user_repo.findByName(name);
+    var opt_user = user_repo.findByName(username);
     if (opt_user.isPresent()) {
       res.setStatus(403);
-      user_token.msg = "Error: User " + name + " is in use";
+      user_token.msg = "User " + username + " is in use";
+      if (debug_output) {
+        System.out.println("/create_user error(403): " + user_token.msg);
+      }
       return user_token;
     }
 
     var user = new UserModel();
-    user.setName(name);
+    user.setName(username);
     user.setPassword(password); 
     user_repo.save(user);
-    System.out.println("created user " + name);
     user_token = Security.genSession(secret_key, user.getId(), 
                                      session_valid_days);
     return user_token;
   }
 
   @GetMapping("/login")
-  public UserTokenJson login(@RequestParam String name, 
+  public UserTokenJson login(@RequestParam String username, 
                              @RequestParam String password,
                              HttpServletResponse res) {
+
+    if (debug_output) {
+      System.out.println("/login: username=" + username);
+    }
+
     var user_token = new UserTokenJson();
-    var opt_user = user_repo.findByName(name);
+    var opt_user = user_repo.findByName(username);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
     if (user == null || !user.isPasswordCorrect(password)) {
       res.setStatus(403);
       user_token.msg = "Username or password is incorrect";
+      if (debug_output) {
+        System.out.println("/login error(403): " + user_token.msg);
+      }
       return user_token;
     }
 
-    System.out.println("User " + name + " logged in");
     user_token = Security.genSession(secret_key, user.getId(), 
                                      session_valid_days);
     return user_token;
@@ -198,15 +240,23 @@ public class Controller {
 
   @Transactional
   @PostMapping("/delete_user")
-  public MessageJson deleteUser(@RequestParam String name, 
+  public MessageJson deleteUser(@RequestParam String username, 
                                 @RequestParam String password,
                                 HttpServletResponse res) {
+
+    if (debug_output) {
+      System.out.println("/delete_user: username=" + username);
+    }
+
     var msg = new MessageJson();
-    var opt_user = user_repo.findByName(name);
+    var opt_user = user_repo.findByName(username);
     UserModel user = opt_user.isPresent() ? opt_user.get() : null;
     if (user == null || !user.isPasswordCorrect(password)) {
       res.setStatus(403);
       msg.msg = "Username or password is incorrect";
+      if (debug_output) {
+        System.out.println("/delete_user error(403): " + msg.msg);
+      }
       return msg;
     }
 
@@ -230,6 +280,16 @@ public class Controller {
       @RequestParam(name="tags", required=false) List<String> tag_names,
       HttpServletResponse res) {
 
+    if (debug_output) {
+      var tags = new ArrayList<String>();
+      if (tag_names != null) {
+        tags.addAll(tag_names);
+      }
+                               
+      System.out.println("/add_post: title=" + title + ", text=" + text +
+                         ", tags=" + tags);
+    }
+
     UserTokenJson token = Security.checkSession(secret_key, session);
     UserModel user = null;
     if (token != null) {
@@ -242,13 +302,17 @@ public class Controller {
     if (token == null || user == null) {
       res.setStatus(403);
       var result = new PostJson();
-      result.msg = "Error: invalid token";
+      result.msg = "Invalid token";
+      if (debug_output) {
+        System.out.println("/add_post error(403): " + result.msg);
+      }
       return result;
     }
 
-    boolean bad_input = false;
     title = title.trim();
     text = text.trim();
+    var bad_input = false;
+    var msg = "";
 
     if (tag_names != null) {
       tag_names = tag_names.stream().map(String::trim)
@@ -256,19 +320,24 @@ public class Controller {
 
       for (var tag : tag_names) {
         if (!tag.matches("^[a-zA-Z]+[a-zA-Z0-9_]*$") || tag.length() > 16) {
+          msg = "Tags are too long or a bad format";
           bad_input = true;
         }
       }
     }
 
     if (title.equals("") || text.equals("")) {
+      msg = "Title and Text can't be empty";
       bad_input = true;
     }
 
     if (bad_input) {
       res.setStatus(400);
       var result = new PostJson();
-      result.msg = "Error: bad input";
+      result.msg = msg;
+      if (debug_output) {
+        System.out.println("/add_post error(400): " + result.msg);
+      }
       return result;
     }
 
@@ -305,19 +374,29 @@ public class Controller {
   public MessageJson deletePost(@RequestParam String session, 
                                 @RequestParam int id,
                                 HttpServletResponse res) {
+    if (debug_output) {
+      System.out.println("/delete_post: id=" + id);
+    }
+
     var msg = new MessageJson();
     UserTokenJson token = Security.checkSession(secret_key, session);
 
     if (token == null) {
       res.setStatus(403);
-      msg.msg = "Error: token";
+      msg.msg = "Invalid token";
+      if (debug_output) {
+        System.out.println("/delete_post error(403): " + msg.msg);
+      }
       return msg;
     }
 
     var opt_post = post_repo.findByIdWithUser(id);
     if (!opt_post.isPresent()) {
       res.setStatus(403);
-      msg.msg = "Error: post not found";
+      msg.msg = "Post not found";
+      if (debug_output) {
+        System.out.println("/delete_post error(403): " + msg.msg);
+      }
       return msg;
     }
 
@@ -325,7 +404,10 @@ public class Controller {
 
     if (post.getUser().getId() != token.id) {
       res.setStatus(403);
-      msg.msg = "Error: cannot delete post";
+      msg.msg = "Cannot delete post";
+      if (debug_output) {
+        System.out.println("/delete_post error(403): " + msg.msg);
+      }
       return msg;
     }
 

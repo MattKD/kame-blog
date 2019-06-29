@@ -217,7 +217,7 @@ public class ControllerTest {
     var password = "12345678";
     var req = MockMvcRequestBuilders.post("/create_user")
               .accept(MediaType.APPLICATION_JSON)
-              .param("name", username)
+              .param("username", username)
               .param("password", password);
 
     var res = mvc.perform(req).andReturn().getResponse();
@@ -237,7 +237,7 @@ public class ControllerTest {
 
     req = MockMvcRequestBuilders.post("/create_user")
               .accept(MediaType.APPLICATION_JSON)
-              .param("name", username)
+              .param("username", username)
               .param("password", password);
 
     res = mvc.perform(req).andReturn().getResponse();
@@ -255,7 +255,7 @@ public class ControllerTest {
     // try creating user with short password
     req = MockMvcRequestBuilders.post("/create_user")
               .accept(MediaType.APPLICATION_JSON)
-              .param("name", username)
+              .param("username", username)
               .param("password", "1234567");
 
     res = mvc.perform(req).andReturn().getResponse();
@@ -299,7 +299,7 @@ public class ControllerTest {
 
     var req = MockMvcRequestBuilders.post("/delete_user")
             .accept(MediaType.APPLICATION_JSON)
-            .param("name", username)
+            .param("username", username)
             .param("password", password + "!");
 
     var res = mvc.perform(req).andReturn().getResponse();
@@ -318,7 +318,7 @@ public class ControllerTest {
 
     req = MockMvcRequestBuilders.post("/delete_user")
               .accept(MediaType.APPLICATION_JSON)
-              .param("name", username)
+              .param("username", username)
               .param("password", password);
 
     res = mvc.perform(req).andReturn().getResponse();
@@ -351,7 +351,7 @@ public class ControllerTest {
 
     var req = MockMvcRequestBuilders.get("/login")
               .accept(MediaType.APPLICATION_JSON)
-              .param("name", username)
+              .param("username", username)
               .param("password", password);
 
     var res = mvc.perform(req).andReturn().getResponse();
@@ -370,7 +370,7 @@ public class ControllerTest {
 
     req = MockMvcRequestBuilders.get("/login")
             .accept(MediaType.APPLICATION_JSON)
-            .param("name", username)
+            .param("username", username)
             .param("password", password + "!");
 
     res = mvc.perform(req).andReturn().getResponse();
