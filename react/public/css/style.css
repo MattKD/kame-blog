@@ -1,0 +1,46 @@
+body {
+  margin-left: 50px;
+  margin-right: 50px;
+  font-family: verdana, arial, helvetica, sans-serif;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+.inline_header {
+  display: inline
+}
+
+.inline_header_right {
+  display: inline;
+  float: right;
+  padding-left: 10px;
+}
+
+a {
+  text-decoration: none
+}
+
+.fake_link {
+  color: blue;
+  cursor: pointer
+}
+
+.err_msg {
+  color: red
+}
+
+.post_form {
+  width: 400px
+}
+.post_form_title, .post_form_text {
+  width: 100%
+}
+.post_form_tags {
+  width: 50%
+}
+
+.foot_link {
+  padding-right: 10px
+}

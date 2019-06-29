@@ -1,0 +1,31 @@
+{
+  "name": "react-blog",
+  "version": "1.0.0",
+  "description": "blog front-end in react",
+  "author": "",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack --mode procuction",
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development",
+    "serve": "node server"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "isomorphic-fetch": "^2.2.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "express": "^4.17.1",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5"
+  },
+  "keywords": []
+}
