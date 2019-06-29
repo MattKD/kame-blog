@@ -1,2 +1,2 @@
-# spring-boot-blog
-Example Rest backend for a simple blog app made with Spring Boot
+# spring-react-blog
+Small blog app written in Spring Boot for the Rest backend, and React for the frontend.
