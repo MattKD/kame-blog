@@ -6,7 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "webpack --mode procuction",
+    "start": "webpack --mode production",
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development",
     "serve": "node server"
