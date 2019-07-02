@@ -9,6 +9,7 @@ const TagsPage = require("./TagsPage");
 const CreateUserPage = require("./CreateUserPage");
 const ErrorPage = require("./ErrorPage");
 const { getCookie } = require("./util");
+const { router_base } = require("./config");
 
 function cookieLoggedIn() {
   const name = getCookie("name");
@@ -148,9 +149,8 @@ class App extends React.Component {
       <ErrorPage {...props} session={session} />
     );
 
-
     return (
-      <Router>
+      <Router basename={router_base}>
         <Switch>
           <Route path="/create_user" exact render={createUserRender} />
           <Route path="/" exact render={indexRender} />
