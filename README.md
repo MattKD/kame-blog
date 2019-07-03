@@ -1,2 +1,2 @@
-# spring-react-blog
-Small blog app written in Spring Boot for the Rest backend, and React for the frontend.
+# kame-blog
+Small multi-user blog app made with React and Spring Boot
