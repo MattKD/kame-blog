@@ -11,7 +11,7 @@ function getPosts(page, size) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function getUserPosts(username, page, size) {
@@ -26,7 +26,7 @@ function getUserPosts(username, page, size) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function getPostsByTags(tags, page, size) {
@@ -44,7 +44,7 @@ function getPostsByTags(tags, page, size) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function login(username, password) {
@@ -58,7 +58,7 @@ function login(username, password) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function addPost(session, title, text, tags) {
@@ -78,7 +78,7 @@ function addPost(session, title, text, tags) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function deletePost(session, postid) {
@@ -98,7 +98,7 @@ function deletePost(session, postid) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function createUser(username, password) {
@@ -118,7 +118,7 @@ function createUser(username, password) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 function deleteUser(username, password) {
@@ -138,7 +138,7 @@ function deleteUser(username, password) {
   }).then((json) => {
     json.status = status; 
     return json;
-  }).catch((err) => console.log(err));
+  });
 }
 
 

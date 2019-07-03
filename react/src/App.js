@@ -52,7 +52,8 @@ class App extends React.Component {
       home_posts: {},
       user_posts: {},
       tag_posts: {},
-      session: this.createSession(session.name, session.id, session.token)    
+      session: this.createSession(session.name, session.id, session.token),
+      server_err: undefined
     };
   }
 
@@ -72,7 +73,6 @@ class App extends React.Component {
     this.setState({
       session: this.createSession(name, id, token)
     });
-    this.forceUpdate();
   }
 
   logout() {
@@ -80,16 +80,14 @@ class App extends React.Component {
     this.setState({
       session: this.createSession()
     });
-    this.forceUpdate();
   }
 
-  clearPosts() {
+  clearPosts(dummy) {
     this.setState({
       home_posts: {},
       user_posts: {},
       tag_posts: {}
     });
-    this.forceUpdate();
   }
 
   updateHomePosts(home_posts) {
@@ -128,6 +126,7 @@ class App extends React.Component {
     const updateUserPosts = this.updateUserPosts;
     const updateTagPosts = this.updateTagPosts;
     const clearPosts = this.clearPosts;
+    const server_err = this.state.server_err;
 
     const createUserRender = (props) => (
       <CreateUserPage {...props} session={session} />

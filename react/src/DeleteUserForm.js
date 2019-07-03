@@ -31,15 +31,19 @@ const DeleteUserForm  = withRouter(class extends React.Component {
           password_el.value = "";
           this.setState({err_msg: null});
           session.logout();
+          this.setState({err_msg: null});
           this.props.onDeleteUser(session.id, session.name);
           history.push("/");
-
         } else { 
-          const err_msg = "Server Error (" + msg.status + "): " + msg.msg;
-          this.setState({err_msg: err_msg});
+          this.setState({err_msg: res.msg});
         }
+      }).catch((err) => {
+        console.log(err);
+        this.setState({
+          err_msg: "A server error occurred. Try again in a few minutes"
+        });
       });
-    };
+};
   }
 
   render() {

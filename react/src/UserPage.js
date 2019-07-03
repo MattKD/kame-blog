@@ -20,6 +20,9 @@ class UserPage extends React.PureComponent {
   constructor(props) {
     super(props);
     this.getUserPosts = this.getUserPosts.bind(this);
+    this.state = {
+      err_msg: null
+    };
   }
 
   getUserPosts(username, page) {
@@ -35,11 +38,18 @@ class UserPage extends React.PureComponent {
       } else {
         user_posts[username] = null;
       }
+      this.setState({err_msg: null});
       updateUserPosts(user_posts);
+    }).catch((err) => {
+      console.log(err);
+      this.setState({
+        err_msg: "A server error occurred. Try again in a few minutes"
+      });
     });
   }
 
   render() {
+    const err_msg = this.state.err_msg;
     const user_posts = this.props.user_posts;
     const params = this.props.match.params;
     const username = params.username;
@@ -58,8 +68,8 @@ class UserPage extends React.PureComponent {
 
     document.title = username + "'s Posts";
 
-    if (user_posts[username] === undefined || 
-        user_posts[username][page] === undefined) {
+    if (!err_msg && (user_posts[username] === undefined || 
+        user_posts[username][page] === undefined)) {
       getUserPosts(username, page);
       return null;
     }
@@ -68,9 +78,9 @@ class UserPage extends React.PureComponent {
       return <ErrorPage session={session} />;
     }
 
-    const posts = user_posts[username][page];
-    let header = username + " has no posts to show";
-    if (posts.length > 0) {
+    const posts = user_posts[username] ? user_posts[username][page] || [] : [];
+    let header = err_msg || username + " has no posts to show";
+    if (!err_msg && posts.length > 0) {
       const start = page * posts_per_page + 1;
       const end = start + posts.length - 1;
       header = username + "'s Posts (" + start + " to " + end + ")";

@@ -54,6 +54,11 @@ class AddPostForm extends React.Component {
         } else { 
           this.setState({err_msg: res.msg});
         }
+      }).catch((err) => {
+        console.log(err);
+        this.setState({
+          err_msg: "A server error occurred. Try again in a few minutes"
+        });
       });
     };
   }

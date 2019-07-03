@@ -15,6 +15,9 @@ class TagsPage extends React.PureComponent {
   constructor(props) {
     super(props);
     this.getPostsByTags = this.getPostsByTags.bind(this);
+    this.state = {
+      err_msg: null
+    };
   }
 
   getPostsByTags(tags, page) {
@@ -26,11 +29,18 @@ class TagsPage extends React.PureComponent {
         tag_posts[tags_str] = {};
       }
       tag_posts[tags_str][page] = res.posts;
+      this.setState({err_msg: null});
       this.props.updateTagPosts(tag_posts);
+    }).catch((err) => {
+      console.log(err);
+      this.setState({
+        err_msg: "A server error occurred. Try again in a few minutes"
+      });
     });
   }
 
   render() {
+    const err_msg = this.state.err_msg;
     const session = this.props.session;
     const tag_posts = this.props.tag_posts;
     const getPostsByTags = this.getPostsByTags;
@@ -41,14 +51,14 @@ class TagsPage extends React.PureComponent {
 
     document.title = "Posts with tags: " + tags;
 
-    if (tag_posts[tags] === undefined || tag_posts[tags][page] === undefined) {
+    if (!err_msg && (tag_posts[tags] === undefined || 
+        tag_posts[tags][page] === undefined)) {
       getPostsByTags(tags_list, page);
-      return null;
     }
 
-    const posts = tag_posts[tags][page];
-    let header = "There is no posts to show with tags: " + tags;
-    if (posts.length > 0) {
+    const posts = tag_posts[tags] ? tag_posts[tags][page] || [] : [];
+    let header = err_msg || "There is no posts to show with tags: " + tags;
+    if (!err_msg && posts.length > 0) {
       const start = page * posts_per_page + 1;
       const end = start + posts.length - 1;
       header = `Showing posts with tags: ${tags} (${start} to ${end})`;

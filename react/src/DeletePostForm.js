@@ -36,10 +36,16 @@ class DeletePostForm extends React.Component {
       deletePost(token, id).then((res) => {
         if (res.status === 200) {
           delete_el.value = "";
+          this.setState({err_msg: null});
           onDeletePost(id);
         } else {
           this.setState({err_msg: res.msg});
         }
+      }).catch((err) => {
+        console.log(err);
+        this.setState({
+          err_msg: "A server error occurred. Try again in a few minutes"
+        });
       });
     };
   }

@@ -8,7 +8,7 @@ class LoginForm extends React.Component {
     super(props);
 
     this.state = {
-      login_failed: false
+      err_msg: null
     };
 
     this.handler = (e) => {
@@ -19,24 +19,28 @@ class LoginForm extends React.Component {
       const username = username_el.value;
       const password = password_el.value;
 
-      login(username, password).then((token) => {
-        if (token.status !== 200) {
-          this.setState({login_failed: true});
+      login(username, password).then((res) => {
+        if (res.status !== 200) {
+          this.setState({err_msg: res.msg});
         } else { 
           username_el.value = "";
           password_el.value = "";
-          this.setState({login_failed: false});
-          session.login(username, token.id, token.token, token.expires);
+          this.setState({err_msg: null});
+          session.login(username, res.id, res.token, res.expires);
         }
+      }).catch((err) => {
+        console.log(err);
+        this.setState({
+          err_msg: "A server error occurred. Try again in a few minutes"
+        });
       });
     };
   }
 
   render() {
-    const login_failed = this.state.login_failed;
-    const err_msg = login_failed  
-      ? <div className="err_msg">Username or password wrong</div>
-      : null;
+    const err_msg = this.state.err_msg ?
+      <div className="err_msg">{this.state.err_msg}</div> :
+      null;
 
     return (
       <div>
