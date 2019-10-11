@@ -25,13 +25,4 @@ create table if not exists post_tags (
   primary key (post_id, tag_id)
 );
 
-/*
-create table if not exists tokens (
-  id serial primary key,
-  name text not null unique,
-  key text not null,
-  expire date not null
-);
-*/
-
 
