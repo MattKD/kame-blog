@@ -27,6 +27,12 @@ Spring build without tests from `spring-react-blog/spring/`
 mvn package -DskipTests
 ```
 
+Create Postgres tables from `spring-react-blog/spring/`. This assumes Postgres is installed with a database named blogdb and user named bloguser.
+
+```
+psql -U bloguser -f create-table.sql blogdb
+```
+
 Running back-end from `spring-react-blog/spring/`
 
 ```
