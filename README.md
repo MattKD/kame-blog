@@ -15,10 +15,16 @@ React development build from `spring-react-blog/react/`
 npm run build-dev
 ```
 
-Spring build from `spring-react-blog/spring/`
+Spring build with tests from `spring-react-blog/spring/`
 
 ```
 mvn package
+```
+
+Spring build without tests from `spring-react-blog/spring/`
+
+```
+mvn package -DskipTests
 ```
 
 Running back-end from `spring-react-blog/spring/`
